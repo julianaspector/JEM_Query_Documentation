@@ -11,7 +11,7 @@ There are two versions of JEM Query script:
 ## Other helpful scripts
 The following scripts were developed as strategies to classify if eWRIMS documents were likely to contain maps. Currently eWRIMS does not designate in database if POU maps are available.
 - Image_Entropy_Filtering_Script.py
-- Machine_Learning_Recognize_Docs_Maps.py (developed based on [Image Detection from scratch in keras tutorial](https://towardsdatascience.com/image-detection-from-scratch-in-keras-f314872006c9))
+- Machine_Learning_Recognize_Docs_Maps.py (developed based on [Image classification from scratch in keras tutorial](https://towardsdatascience.com/image-detection-from-scratch-in-keras-f314872006c9))
 
 Other useful tools include:
 - HUC_Visualization.app: Allows user to visualize hydrologic unit code boundaries in web application.
