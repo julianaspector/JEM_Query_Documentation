@@ -15,7 +15,7 @@ The following scripts were developed as strategies to classify if eWRIMS documen
 
 Other useful tools include:
 - HUC_Visualization.app: Allows user to visualize hydrologic unit code boundaries in web application.
-- PDF_to_JPEG_Conversion_Script.R: Allows user to batch convert PDF documents to JPEG format for image processing.
+- PDF_To_JPEG_Conversion_Script.R: Allows user to batch convert PDF documents to JPEG format for image processing.
 
 ## Documentation
 Documentation (JEM_Query_Documentation.Rmd) was developed in learnr platform. To view documentation in application mode, you will need to install [learnr](https://rstudio.github.io/learnr/index.html). Install the learnr package from CRAN following these [instructions](https://rstudio.github.io/learnr/index.html#Getting_Started).
