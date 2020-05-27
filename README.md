@@ -18,6 +18,4 @@ Other useful tools include:
 - PDF_to_JPEG_Conversion_Script.R: Allows user to batch convert PDF documents to JPEG format for image processing.
 
 ## Documentation
-Documentation (JEM_Query_Documentation.Rmd) was developed in learnr platform. To view documentation in application mode, you will need to install [learnr](https://rstudio.github.io/learnr/index.html). Install the learnr package from CRAN as follows:
-1. install.packages("learnr")
-Note: Install the latest release of RStudio (v1.0.136 or later) as it includes tools for easily running and previewing tutorials.
+Documentation (JEM_Query_Documentation.Rmd) was developed in learnr platform. To view documentation in application mode, you will need to install [learnr](https://rstudio.github.io/learnr/index.html). Install the learnr package from CRAN as following these [instructions](https://rstudio.github.io/learnr/index.html#Getting_Started).
