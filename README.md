@@ -14,7 +14,7 @@ The following scripts were developed as strategies to classify if eWRIMS documen
 - Machine_Learning_Recognize_Docs_Maps.py (developed based on [Image Detection from scratch in keras tutorial](https://towardsdatascience.com/image-detection-from-scratch-in-keras-f314872006c9))
 
 Other useful tools include:
-- HUC_Visualization.app: Allows user to visualize hydrologic unit code boundaries in web application
+- HUC_Visualization.app: Allows user to visualize hydrologic unit code boundaries in web application.
 - PDF_to_JPEG_Conversion_Script.R: Allows user to batch convert PDF documents to JPEG format for image processing.
 
 ## Documentation
