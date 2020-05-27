@@ -1,6 +1,6 @@
-# JEM Query Documentation
+# JEM Query Tool Documentation
 
-## About JEM Query
+## About JEM Query Tool
 This tool was developed to support place of use mapping effort for Division of Water Rights at State Water Resource Control Board. The JEM Query can determine points of diversion within a defined watershed area and download available documents for related water right records from Electronic Water Right Management System (eWRIMS). JEM Query can also determine if previously scanned and georeferenced place of use (POU) maps are available for water rights of interest. After user has identified any eWRIMS documents that contain maps, JEM Query creates a list of water right application IDs that will require investigation in water rights records room to determine if POU maps are available on file. Finally, the JEM Query can generate a summary table of water right information for records of interest based on eWRIMS flat files.
 
 ## Script Versions
@@ -19,5 +19,5 @@ Other useful tools include:
 
 ## Documentation
 Documentation (JEM_Query_Documentation.Rmd) was developed in learnr platform. To view documentation in application mode, you will need to install [learnr](https://rstudio.github.io/learnr/index.html). Install the learnr package from CRAN as follows:
-- install.packages("learnr")
-- install the latest release of RStudio (v1.0.136 or later) as it includes tools for easily running and previewing tutorials.
+1. install.packages("learnr")
+2. install the latest release of RStudio (v1.0.136 or later) as it includes tools for easily running and previewing tutorials.
