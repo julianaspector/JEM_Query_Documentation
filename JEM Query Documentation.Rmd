@@ -115,7 +115,7 @@ MOK <- hu_8 %>% filter(Name == 'Upper Mokelumne')
 watershed <- st_difference(MOK, legalDelta)
 ```
 
-The HUC boundaries can be obtained online from [USGS National Hydrography Dataset](ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/) (in event that user does not have access to Water49), but boundaries for HUCs 8, 10, and 12 have also been placed into www/ subdirectory on [MITWG Sharepoint](https://cawaterboards.sharepoint.com/:f:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/R%20Code/JEM%20Query%20Documentation/www?csf=1&web=1&e=W97YpK) for easy access.
+The HUC boundaries can be obtained online from [USGS National Hydrography Dataset](ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/) (in event that user does not have access to Water49).
 
 For each watershed, you will need to use different HUC boundaries and/or additional shapefiles to define your boundary. You can map boundaries and examine attributes in ArcGIS to determine desired watershed.
 
