@@ -104,18 +104,18 @@ correctSQL <- function(x) {
   SF_links <-
     sapply(app_numbers[endsWith(app_numbers, "SF")], link, "Appropriative (State Filing)")
   
-  
-  # for (i in 1:length(A_links)) {
-  # browseURL(A_links[i])
-  # }
-  # 
-  # for (i in 1:length(S_links)) {
-  # browseURL(S_links[i])
-  # }
-  # 
-  # for (i in 1:length(SF_links)) {
-  # browseURL(SF_links[i])
-  # }
+  # you can comment out the next three loops if want to avoid downloading files from eWRIMS
+  for (i in 1:length(A_links)) {
+  browseURL(A_links[i])
+  }
+
+  for (i in 1:length(S_links)) {
+  browseURL(S_links[i])
+  }
+
+  for (i in 1:length(SF_links)) {
+  browseURL(SF_links[i])
+  }
   
   # generate a count to see if all docs possible were downloaded from eWRIMS
   c <- sum(startsWith(app_numbers, "C"))
