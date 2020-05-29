@@ -98,9 +98,13 @@ readKey <- function() {
 
 The methodology for using locally provided shapefiles was developed as a result of extended telework situation during COVID-19 pandemic. Staff without access to VPN will need to access locally saved shapefiles in /www subdirectory to determine watershed boundary.
 
-`st_read` reads locally saved shapefiles for geometry and attributes and `st_transform` can transform a shapefile's coordinate reference system. `filter` selects relevant records based on watershed name. `st_difference` finds area in first argument not in second argument.
+The HUC boundaries can be obtained online from [USGS National Hydrography Dataset](ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/) (in event that user does not have access to Water49).
 
-Here is a more complicated example encountered for Mokelumne River watershed. In this case, we wanted to use Upper Mokelumne River watershed from HUC-8 boundaries, but wanted to exclude any water right records that fell within the Legal Delta boundaries (as POU is being already mapped in detail for this area by Office of Delta Watermaster).
+For each watershed, you will need to use different HUC boundaries and/or additional shapefiles to define your boundary. You can map boundaries and examine attributes in ArcGIS to determine desired watershed.
+
+In code example below, here is a more complicated example encountered for Mokelumne River watershed. In this case, we wanted to use Upper Mokelumne River watershed from HUC-8 boundaries, but wanted to exclude any water right records that fell within the Legal Delta boundaries (as POU is being already mapped in detail for this area by Office of Delta Watermaster).
+
+`st_read` reads locally saved shapefiles for geometry and attributes and `st_transform` can transform a shapefile's coordinate reference system. `filter` selects relevant records based on watershed name. `st_difference` finds area in first argument not in second argument.
 
 ```{r import local shapefiles, eval=FALSE}
 legalDelta <- st_read('Legal_Delta.shp')
@@ -114,10 +118,6 @@ MOK <- hu_8 %>% filter(Name == 'Upper Mokelumne')
 
 watershed <- st_difference(MOK, legalDelta)
 ```
-
-The HUC boundaries can be obtained online from [USGS National Hydrography Dataset](ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/) (in event that user does not have access to Water49).
-
-For each watershed, you will need to use different HUC boundaries and/or additional shapefiles to define your boundary. You can map boundaries and examine attributes in ArcGIS to determine desired watershed.
 
 ### Using Water49 for watershed boundary
 
@@ -172,14 +172,13 @@ The code for HUC_Visualization_App.R was written with access to Water49 in mind,
 
 ## Determine PODs in watershed
 
-This part of the code is wrapped in a function (`correctSQL`) to return an error (and stop script) if an incorrect SQL query caused the `watershed` variable to return 0 records. 
+This part of the code is wrapped in a function (`correctSQL`) to return an error (and stop script) if an incorrect SQL query caused `watershed` variable to return 0 records. 
 
-This section will start to break down the code in the `correctSQL` function. The code for `JEM_Query_Local.R` and `JEM_Query_Water49_Access.R` differ only in whether the points of diversion are read in from a local shapefile (copy from Water49 provided to ICF on 2/14/2020) or from the POD layer on Water49. 
+This section will start to break down the code in `correctSQL` function. The code for `JEM_Query_Local.R` and `JEM_Query_Water49_Access.R` differ only in whether points of diversion are read in from a local shapefile (copy from Water49 provided to ICF on 2/14/2020) or from the POD layer on Water49. 
 
 Layers in Water49 can change names over time, so it may be necessary to check that layer name in script corresponds to Water49. The cornerstone to both approaches is the `st_intersection` function that will find points of diversion (PODs) within watershed boundary.
 
 Relevant parts of code from `JEM_Query_Local.R`: 
-
 ```{r, eval=FALSE}
   POD <- st_read("www/20200214_WBGIS_POD.shp")
   
@@ -261,9 +260,9 @@ The POD layer from Water49 has some inconsistencies with eWRIMS flat files and d
 
 ## Download relevant eWRIMS documents
 
-Now that we have the application IDs corrected, we can now download relevant documents from eWRIMS online database. First we generate the list of links to which the web browser will navigate. Web link generators have been set up for Statements of Diversion and Use, Appropriative, and Appropriative (State Filing) based on what links on eWRIMS have previously yielded documents. 
+Now that we have the application IDs corrected, we can now download relevant documents from eWRIMS online database. First we generate list of links to which the web browser will navigate. Web link generators have been set up for Statements of Diversion and Use, Appropriative, and Appropriative (State Filing) based on what links on eWRIMS have previously yielded documents. 
 
-Then we navigate to the linked web pages. This process will take awhile depending on how many PODs are within the watershed. Documents will be downloaded to the download path defined within Google Chrome (see Setup page for more details).
+Then we navigate to linked web pages to download documents from eWRIMS. This process will take awhile depending on how many PODs are within the watershed. Documents will be downloaded to download path defined within Google Chrome (see Setup page for more details).
 
 ```{r, eval=FALSE}
   POD_in_watershed$link <- character(length(nrow(POD_in_watershed)))
@@ -301,7 +300,7 @@ Then we navigate to the linked web pages. This process will take awhile dependin
 
 ## Were all possible eWRIMS documents downloaded?
 
-This last part of the `correctSQL` function serves as a check that all possible documents from eWRIMS were downloaded. Generally, you can check that variable `total_WR` is equivalent to number of PODs within watershed. If not, it is possible that some documents were unavailable for download on eWRIMS and you can check to which application IDs that may be applicable. It is a confirmation that documents were unavailable as opposed to not downloaded due to server timeout or similar issue.
+This last part of `correctSQL` function serves as a check that all possible documents from eWRIMS were downloaded. Generally, you can check that variable `total_WR` is equivalent to number of PODs within watershed. If not, it is possible that some documents were unavailable for download on eWRIMS and you can check to which application IDs that may be applicable. It is a confirmation that documents were unavailable as opposed to not downloaded due to server timeout or similar issue.
 
 ```{r, eval=FALSE}
   # generate a count to see if all docs possible were downloaded from eWRIMS
@@ -325,7 +324,7 @@ This last part of the `correctSQL` function serves as a check that all possible 
   total_WR <<- a + c + d + f + l + s + x
 ```
 
-After `correctSQL` function finishes executing, the `readKey` function is called to pause script and allow user to determine which downloaded documents have maps and to copy those documents to a new directory. Documents should be named by application ID. 
+After `correctSQL` function finishes executing, the `readKey` function is called to pause script and allow user to determine which downloaded documents have maps and to copy those documents to a new, pre-defined directory. Documents should be named by application ID. 
 
 User can manually look through documents to identify those with maps or possibly adapt upon work developed to use image entropy classification (see [Image_Entropy_Filtering_Script.py](https://cawaterboards.sharepoint.com/:u:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/Image%20Entropy%20Classification/Image_Entropy_Filtering_Script.py?csf=1&web=1&e=mOoKgh)) or machine learning (see [Machine_Learning_Recognize_Docs_Maps.py](https://cawaterboards.sharepoint.com/:u:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/Machine%20Learning/Machine_Learning_Recognize_Docs_Maps.py?csf=1&web=1&e=w9JsE6)).
 
@@ -333,7 +332,7 @@ User can manually look through documents to identify those with maps or possibly
 
 After eWRIMS documents with maps have been identified and associated directory has been added to script, user can then press ENTER in console to continue script. 
 
-At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. [Documentation](https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&csf=1&web=1&e=eaHTuc) on MITWG Sharepoint describes locations of legacy maps on shared drive.
+At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. [Documentation](https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&csf=1&web=1&e=eaHTuc) on MITWG Sharepoint describes locations of legacy scanned and georeferenced maps on shared drive.
 
 ```{r, eval=FALSE}
 # directory will contain eWRIMS documents with PDF maps named by APPL_ID
@@ -375,7 +374,7 @@ dbWriteTable(con, "database_table", database_table)
 
 ## Query SQLite database & join information from eWRIMS flat files
 
-Now that the SQLite database has been built, it can be queried for watershed records of interest and then joined to information in eWRIMS flat files by application ID (including beneficial uses, water right types, primary owner, face value, status, and county). 
+Now that SQLite database has been built, it can be queried for watershed records of interest and then joined to information in eWRIMS flat files by application ID (including beneficial uses, water right types, primary owner, face value, status, and county). 
 
 ```{r, eval=FALSE}
 res <- subset(database_table, APPL_ID %in% app_numbers)
