@@ -124,7 +124,7 @@ correctSQL <- function(x) {
   l <- sum(startsWith(app_numbers, "L"))
   x <- sum(startsWith(app_numbers, "X"))
   
-  directory is where statements/applications were downloaded
+  #directory is where statements/applications were downloaded
   a <-
     sum(startsWith(setdiff(
       app_numbers, file_path_sans_ext(list.files("ENTER DIRECTORY PATH HERE"))
