@@ -98,7 +98,7 @@ readKey <- function() {
 
 The methodology for using locally provided shapefiles was developed as a result of extended telework situation during COVID-19 pandemic. Staff without access to VPN will need to access locally saved shapefiles in /www subdirectory to determine watershed boundary.
 
-The HUC boundaries can be obtained online from [USGS National Hydrography Dataset](ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/) (in event that user does not have access to Water49).
+The HUC boundaries can be obtained online from [USGS National Hydrography Dataset](ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/) (Note: To open link, right click and select "Open Link in Browser".)
 
 For each watershed, you will need to use different HUC boundaries and/or additional shapefiles to define your boundary. You can map boundaries and examine attributes in ArcGIS to determine desired watershed.
 
@@ -107,8 +107,8 @@ In code example below, here is a more complicated example encountered for Mokelu
 `st_read` reads locally saved shapefiles for geometry and attributes and `st_transform` can transform a shapefile's coordinate reference system. `filter` selects relevant records based on watershed name. `st_difference` finds area in first argument not in second argument.
 
 ```{r import local shapefiles, eval=FALSE}
-legalDelta <- st_read('Legal_Delta.shp')
-hu_8 <-  st_read('WBDHU8.shp')
+legalDelta <- st_read('www/Legal_Delta.shp')
+hu_8 <-  st_read('www/WBDHU8.shp')
 
 # transform shapefiles used into same coordinate system
 legalDelta <- st_transform(legalDelta, crs = 4326)

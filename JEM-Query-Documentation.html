@@ -197,12 +197,12 @@ Set download location within Google Chrome at Settings –&gt; Advanced –&gt; 
 <div id="section-depending-on-sf-and-dplyr-packages" class="section level4">
 <h4>Depending on sf and dplyr packages</h4>
 <p>The methodology for using locally provided shapefiles was developed as a result of extended telework situation during COVID-19 pandemic. Staff without access to VPN will need to access locally saved shapefiles in /www subdirectory to determine watershed boundary.</p>
-<p>The HUC boundaries can be obtained online from <a href="ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/">USGS National Hydrography Dataset</a> (in event that user does not have access to Water49).</p>
+<p>The HUC boundaries can be obtained online from <a href="ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/">USGS National Hydrography Dataset</a>(Note: To open link, right click and select “Open Link in Browser”.)</p>
 <p>For each watershed, you will need to use different HUC boundaries and/or additional shapefiles to define your boundary. You can map boundaries and examine attributes in ArcGIS to determine desired watershed.</p>
 <p>In code example below, here is a more complicated example encountered for Mokelumne River watershed. In this case, we wanted to use Upper Mokelumne River watershed from HUC-8 boundaries, but wanted to exclude any water right records that fell within the Legal Delta boundaries (as POU is being already mapped in detail for this area by Office of Delta Watermaster).</p>
 <p><code>st_read</code> reads locally saved shapefiles for geometry and attributes and <code>st_transform</code> can transform a shapefile’s coordinate reference system. <code>filter</code> selects relevant records based on watershed name. <code>st_difference</code> finds area in first argument not in second argument.</p>
-<pre class="r"><code>legalDelta &lt;- st_read(&#39;Legal_Delta.shp&#39;)
-hu_8 &lt;-  st_read(&#39;WBDHU8.shp&#39;)
+<pre class="r"><code>legalDelta &lt;- st_read(&#39;www/Legal_Delta.shp&#39;)
+hu_8 &lt;-  st_read(&#39;www/WBDHU8.shp&#39;)
 
 # transform shapefiles used into same coordinate system
 legalDelta &lt;- st_transform(legalDelta, crs = 4326)
@@ -398,9 +398,16 @@ watershed &lt;-
 </div>
 <div id="section-determine-which-maps-have-already-been-scanned" class="section level2">
 <h2>Determine which maps have already been scanned</h2>
-<p>After eWRIMS documents with maps have been identified and associated directory has been added to script, user can then press ENTER in console to continue script.</p>
+<p>After eWRIMS documents with maps have been identified and copied into pre-defined directory, user can then press ENTER in console to continue script.<code>BayDelta_masterlist</code> was generated based on all PODs within the Bay-Delta boundary shapefile.</p>
 <p>At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. <a href="https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&amp;csf=1&amp;web=1&amp;e=eaHTuc">Documentation</a> on MITWG Sharepoint describes locations of legacy scanned and georeferenced maps on shared drive.</p>
-<pre class="r"><code># directory will contain eWRIMS documents with PDF maps named by APPL_ID
+<pre class="r"><code># Generate master list of all water rights in Bay-Delta boundary area ----
+BayDelta_masterlist &lt;-
+  read.csv(&#39;www/Application_IDs_MasterList.csv&#39;)
+BayDelta_masterlist &lt;- BayDelta_masterlist %&gt;% select(&quot;APPL_ID&quot;)
+recode(BayDelta_masterlist$APPL_ID, &quot;S17275&quot; = &quot;S017275&quot;) -&gt; BayDelta_masterlist$APPL_ID
+BayDelta_masterlist &lt;- unique(BayDelta_masterlist)
+
+# directory will contain eWRIMS documents with PDF maps named by APPL_ID
 # will need to look through all documents downloaded to determine which ones have maps
 eWRIMS_available &lt;-
   data.frame(file_path_sans_ext(list.files(&#39;ENTER DIRECTORY PATH HERE&#39;)))
