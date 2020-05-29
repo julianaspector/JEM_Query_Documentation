@@ -330,11 +330,18 @@ User can manually look through documents to identify those with maps or possibly
 
 ## Determine which maps have already been scanned
 
-After eWRIMS documents with maps have been identified and associated directory has been added to script, user can then press ENTER in console to continue script. 
+After eWRIMS documents with maps have been identified and copied into pre-defined directory, user can then press ENTER in console to continue script.`BayDelta_masterlist` was generated based on all PODs within the Bay-Delta boundary shapefile.
 
 At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. [Documentation](https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&csf=1&web=1&e=eaHTuc) on MITWG Sharepoint describes locations of legacy scanned and georeferenced maps on shared drive.
 
 ```{r, eval=FALSE}
+# Generate master list of all water rights in Bay-Delta boundary area ----
+BayDelta_masterlist <-
+  read.csv('www/Application_IDs_MasterList.csv')
+BayDelta_masterlist <- BayDelta_masterlist %>% select("APPL_ID")
+recode(BayDelta_masterlist$APPL_ID, "S17275" = "S017275") -> BayDelta_masterlist$APPL_ID
+BayDelta_masterlist <- unique(BayDelta_masterlist)
+
 # directory will contain eWRIMS documents with PDF maps named by APPL_ID
 # will need to look through all documents downloaded to determine which ones have maps
 eWRIMS_available <-
