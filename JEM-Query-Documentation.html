@@ -148,18 +148,19 @@ library(svDialogs) # generates dialog boxes for SQL query of HUC layer in Water4
 </div>
 <div id="section-locally-available-shapefiles-and-data" class="section level3">
 <h3>Locally Available Shapefiles and Data</h3>
-<p>For ease of accessing locally available shapefiles and data, the JEM Query sets working directory to script location path. All shapefiles and data should be available within a www/ sub-directory.</p>
+<p>For ease of accessing locally available shapefiles and data, the JEM Query sets working directory to script location path. All shapefiles and data should be available within a www/ sub-directory. All necessary files (this documentation, scripts, and data) can be downloaded from <a href="https://cawaterboards.sharepoint.com/:f:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/R%20Code/JEM%20Query%20Documentation?csf=1&amp;web=1&amp;e=x1LHKe">MITWG Sharepoint site</a>.</p>
 </div>
 <div id="section-set-up-google-chrome" class="section level3">
 <h3>Set up Google Chrome</h3>
-<p>You need to set up Google Chrome as default browser within computer settings and select where Chrome will download any files from eWRIMS online database in advanced settings. See screenshots below:</p>
+<p>You need to set up Google Chrome as default browser within computer settings and select where Chrome will download any files from eWRIMS online database in advanced settings. It may be possible to use other browsers, but you will need to know how to set up the download location path.</p>
+<p>After downloading documents from eWRIMS, you will want to reset this path as Chrome will keep downloading documents to sane path otherwise. See screenshots below:</p>
 <div class="figure">
 <img src="images/Set_Default_Browser.png" alt="Set default browser to Google Chrome in Windows 10 within Computer Settings --&gt; Apps --&gt; Default apps --&gt; Web browser" width="100%" />
 <p class="caption">
 Set default browser to Google Chrome in Windows 10 within Computer Settings –&gt; Apps –&gt; Default apps –&gt; Web browser
 </p>
 </div>
-<p>Follow these instructions in Google Chrome to stop PDF files from automatically opening in system viewer after download and set your download location.</p>
+<p>Follow these instructions in Google Chrome to stop PDF files from automatically opening in system viewer after download (to speed download process) and set your download location.</p>
 <ol style="list-style-type: decimal">
 <li>Open Chrome Settings</li>
 <li>Expand Advanced</li>
@@ -180,11 +181,11 @@ Set download location within Google Chrome at Settings –&gt; Advanced –&gt; 
 </div>
 <div id="section-fill-in-necessary-directory-paths" class="section level3">
 <h3>Fill in necessary directory paths</h3>
-<p>User should go through script prior to execution and fill in necessary directory paths. You need to pre-define two separate paths (Google Chrome default download location and where maps identified from eWRIMS will be stored). There are three lines of script that need paths filled in.</p>
+<p>User should go through script prior to execution and fill in necessary directory paths. You need to pre-define two separate paths (Google Chrome default download location and where maps identified from eWRIMS will be stored). There are three lines of script that need paths filled in. You can search for these line using the find function for “ENTER DIRECTORY PATH HERE”. Remember to use “/” between any folders in the directory path.</p>
 </div>
 <div id="section-readkey-function" class="section level3">
 <h3><code>readKey</code> function</h3>
-<p>The <code>readKey</code> function allows user to pause the script after watershed area has been defined, points of diversion determined, and documents from eWRIMS downloaded. Then user can determine which documents have maps and place in pre-defined directory. In order for <code>read_key</code> function to pause script appropriately, user should use SOURCE button if running the entire script (as opposed to RUN button).</p>
+<p>The <code>readKey</code> function allows user to pause the script after watershed area has been defined, points of diversion determined, and documents from eWRIMS downloaded. Then user can determine which documents have maps and place in pre-defined directory. In order for <code>read_key</code> function to pause script appropriately, user should use SOURCE button if running the entire script (as opposed to RUN button). If user only wants to run certain lines of code, using the RUN button is fine.</p>
 <pre class="r"><code>readKey &lt;- function() {
   line &lt;- readline(prompt=&quot;Press [enter] to continue&quot;)
 }</code></pre>
@@ -197,7 +198,7 @@ Set download location within Google Chrome at Settings –&gt; Advanced –&gt; 
 <div id="section-depending-on-sf-and-dplyr-packages" class="section level4">
 <h4>Depending on sf and dplyr packages</h4>
 <p>The methodology for using locally provided shapefiles was developed as a result of extended telework situation during COVID-19 pandemic. Staff without access to VPN will need to access locally saved shapefiles in /www subdirectory to determine watershed boundary.</p>
-<p>The HUC boundaries can be obtained online from <a href="ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/">USGS National Hydrography Dataset</a>(Note: To open link, right click and select “Open Link in Browser”.)</p>
+<p>The HUC boundaries can be obtained online from <a href="ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/HU2/Shape/">USGS National Hydrography Dataset</a> (Note: To open link, right click and select “Open Link in Browser”.)</p>
 <p>For each watershed, you will need to use different HUC boundaries and/or additional shapefiles to define your boundary. You can map boundaries and examine attributes in ArcGIS to determine desired watershed.</p>
 <p>In code example below, here is a more complicated example encountered for Mokelumne River watershed. In this case, we wanted to use Upper Mokelumne River watershed from HUC-8 boundaries, but wanted to exclude any water right records that fell within the Legal Delta boundaries (as POU is being already mapped in detail for this area by Office of Delta Watermaster).</p>
 <p><code>st_read</code> reads locally saved shapefiles for geometry and attributes and <code>st_transform</code> can transform a shapefile’s coordinate reference system. <code>filter</code> selects relevant records based on watershed name. <code>st_difference</code> finds area in first argument not in second argument.</p>
@@ -400,7 +401,7 @@ watershed &lt;-
 <h2>Determine which maps have already been scanned</h2>
 <p>After eWRIMS documents with maps have been identified and copied into pre-defined directory, user can then press ENTER in console to continue script.<code>BayDelta_masterlist</code> was generated based on all PODs within the Bay-Delta boundary shapefile.</p>
 <p>At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. <a href="https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&amp;csf=1&amp;web=1&amp;e=eaHTuc">Documentation</a> on MITWG Sharepoint describes locations of legacy scanned and georeferenced maps on shared drive.</p>
-<pre class="r"><code># Generate master list of all water rights in Bay-Delta boundary area ----
+<pre class="r"><code># Generate master list of all water rights in Bay-Delta boundary area
 BayDelta_masterlist &lt;-
   read.csv(&#39;www/Application_IDs_MasterList.csv&#39;)
 BayDelta_masterlist &lt;- BayDelta_masterlist %&gt;% select(&quot;APPL_ID&quot;)

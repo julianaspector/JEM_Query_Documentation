@@ -49,17 +49,19 @@ library(svDialogs) # generates dialog boxes for SQL query of HUC layer in Water4
 ```
 
 ### Locally Available Shapefiles and Data
-For ease of accessing locally available shapefiles and data, the JEM Query sets working directory to script location path. All shapefiles and data should be available within a www/ sub-directory.
+For ease of accessing locally available shapefiles and data, the JEM Query sets working directory to script location path. All shapefiles and data should be available within a www/ sub-directory. All necessary files (this documentation, scripts, and data) can be downloaded from [MITWG Sharepoint site](https://cawaterboards.sharepoint.com/:f:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/R%20Code/JEM%20Query%20Documentation?csf=1&web=1&e=x1LHKe).
 
 ### Set up Google Chrome
 
-You need to set up Google Chrome as default browser within computer settings and select where Chrome will download any files from eWRIMS online database in advanced settings. See screenshots below:
+You need to set up Google Chrome as default browser within computer settings and select where Chrome will download any files from eWRIMS online database in advanced settings. It may be possible to use other browsers, but you will need to know how to set up the download location path.
+
+After downloading documents from eWRIMS, you will want to reset this path as Chrome will keep downloading documents to sane path otherwise. See screenshots below:
 
 ```{r fig1, echo = FALSE, out.width = "100%", fig.cap = "Set default browser to Google Chrome in Windows 10 within Computer Settings --> Apps --> Default apps --> Web browser"}
 knitr::include_graphics("images/Set_Default_Browser.png")
 ```
 
-Follow these instructions in Google Chrome to stop PDF files from automatically opening in system viewer after download and set your download location.
+Follow these instructions in Google Chrome to stop PDF files from automatically opening in system viewer after download (to speed download process) and set your download location.
 
 1. Open Chrome Settings
 2. Expand Advanced
@@ -78,11 +80,11 @@ knitr::include_graphics("images/Select_Download_Location.png")
 
 ### Fill in necessary directory paths
 
-User should go through script prior to execution and fill in necessary directory paths. You need to pre-define two separate paths (Google Chrome default download location and where maps identified from eWRIMS will be stored). There are three lines of script that need paths filled in.
+User should go through script prior to execution and fill in necessary directory paths. You need to pre-define two separate paths (Google Chrome default download location and where maps identified from eWRIMS will be stored). There are three lines of script that need paths filled in. You can search for these line using the find function for "ENTER DIRECTORY PATH HERE". Remember to use "/" between any folders in the directory path.
 
 ### `readKey` function
 
-The `readKey` function allows user to pause the script after watershed area has been defined, points of diversion determined, and documents from eWRIMS downloaded. Then user can determine which documents have maps and place in pre-defined directory. In order for `read_key` function to pause script appropriately, user should use SOURCE button if running the entire script (as opposed to RUN button).
+The `readKey` function allows user to pause the script after watershed area has been defined, points of diversion determined, and documents from eWRIMS downloaded. Then user can determine which documents have maps and place in pre-defined directory. In order for `read_key` function to pause script appropriately, user should use SOURCE button if running the entire script (as opposed to RUN button). If user only wants to run certain lines of code, using the RUN button is fine.
 
 ````{r, eval=FALSE}
 readKey <- function() {
@@ -262,7 +264,7 @@ The POD layer from Water49 has some inconsistencies with eWRIMS flat files and d
 
 Now that we have the application IDs corrected, we can now download relevant documents from eWRIMS online database. First we generate list of links to which the web browser will navigate. Web link generators have been set up for Statements of Diversion and Use, Appropriative, and Appropriative (State Filing) based on what links on eWRIMS have previously yielded documents. 
 
-Then we navigate to linked web pages to download documents from eWRIMS. This process will take awhile depending on how many PODs are within the watershed. Documents will be downloaded to download path defined within Google Chrome (see Setup page for more details).
+Then we navigate to linked web pages to download documents from eWRIMS. This process will take awhile depending on how many PODs are within the watershed. Documents will be downloaded to download path defined within Google Chrome (see Setup page for more details). If you later want to come back and run parts of the code without the eWRIMS documents being downloaded, you can comment out the "for loops" that call `browseURL` function. 
 
 ```{r, eval=FALSE}
   POD_in_watershed$link <- character(length(nrow(POD_in_watershed)))
@@ -335,7 +337,7 @@ After eWRIMS documents with maps have been identified and copied into pre-define
 At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. [Documentation](https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&csf=1&web=1&e=eaHTuc) on MITWG Sharepoint describes locations of legacy scanned and georeferenced maps on shared drive.
 
 ```{r, eval=FALSE}
-# Generate master list of all water rights in Bay-Delta boundary area ----
+# Generate master list of all water rights in Bay-Delta boundary area
 BayDelta_masterlist <-
   read.csv('www/Application_IDs_MasterList.csv')
 BayDelta_masterlist <- BayDelta_masterlist %>% select("APPL_ID")
@@ -373,7 +375,7 @@ database_table <- left_join(database_table, license_maps)
 database_table <- left_join(database_table, legacy_maps)
 database_table[is.na(database_table)] <- 'N'
 
-# Create an ephemeral in-memory RSQLite database and generate query ----
+# Create an ephemeral in-memory RSQLite database and generate query 
 con <- dbConnect(RSQLite::SQLite(), ":memory:")
 
 dbWriteTable(con, "database_table", database_table)
@@ -386,7 +388,7 @@ Now that SQLite database has been built, it can be queried for watershed records
 ```{r, eval=FALSE}
 res <- subset(database_table, APPL_ID %in% app_numbers)
 
-# join APPL_IDs and availability information ----
+# join APPL_IDs and availability information 
 
 POD_in_watershed <- inner_join(POD_in_watershed, res)
 # remove unnecessary variables from environments
