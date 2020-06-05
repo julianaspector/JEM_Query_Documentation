@@ -148,6 +148,7 @@ correctSQL <- function(x) {
   SF_links <-
     sapply(app_numbers[endsWith(app_numbers, "SF")], link, "Appropriative (State Filing)")
   
+# you can comment out the next three loops if want to avoid downloading files from eWRIMS
   
   for (i in 1:length(A_links)) {
     browseURL(A_links[i])
@@ -179,7 +180,7 @@ correctSQL <- function(x) {
     ), "S"))
   
   
-  total_WR <<- a + c + d + f + l + s + x
+  other_WR <<- a + c + d + f + l + s + x
   
 }
 

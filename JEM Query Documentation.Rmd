@@ -286,6 +286,7 @@ Then we navigate to linked web pages to download documents from eWRIMS. This pro
   SF_links <-
     sapply(app_numbers[endsWith(app_numbers, "SF")], link, "Appropriative (State Filing)")
   
+# you can comment out the next three loops if want to avoid downloading files from eWRIMS
   
   for (i in 1:length(A_links)) {
   browseURL(A_links[i])
@@ -302,7 +303,7 @@ Then we navigate to linked web pages to download documents from eWRIMS. This pro
 
 ## Were all possible eWRIMS documents downloaded?
 
-This last part of `correctSQL` function serves as a check that all possible documents from eWRIMS were downloaded. Generally, you can check that variable `total_WR` is equivalent to number of PODs within watershed. If not, it is possible that some documents were unavailable for download on eWRIMS and you can check to which application IDs that may be applicable. It is a confirmation that documents were unavailable as opposed to not downloaded due to server timeout or similar issue.
+This last part of `correctSQL` function serves as a check that all possible documents from eWRIMS were downloaded. Generally, you can check that sum of value `other_WR` and number of files downloaded from eWRIMS is equivalent to number of unique application IDs (value `app_numbers`). It is a confirmation that documents were unavailable as opposed to not downloaded due to server timeout or similar issue.
 
 ```{r, eval=FALSE}
   # generate a count to see if all docs possible were downloaded from eWRIMS
@@ -323,7 +324,7 @@ This last part of `correctSQL` function serves as a check that all possible docu
     ), "S"))
   
   
-  total_WR <<- a + c + d + f + l + s + x
+  other_WR <<- a + c + d + f + l + s + x
 ```
 
 After `correctSQL` function finishes executing, the `readKey` function is called to pause script and allow user to determine which downloaded documents have maps and to copy those documents to a new, pre-defined directory. Documents should be named by application ID. 

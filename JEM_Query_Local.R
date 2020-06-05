@@ -135,7 +135,7 @@ correctSQL <- function(x) {
     ), "S"))
 
 
-  total_WR <<- a + c + d + f + l + s + x
+  other_WR <<- a + c + d + f + l + s + x
   
 }
 correctSQL(x)

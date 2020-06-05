@@ -339,7 +339,7 @@ watershed &lt;-
 <div id="section-download-relevant-ewrims-documents" class="section level2">
 <h2>Download relevant eWRIMS documents</h2>
 <p>Now that we have the application IDs corrected, we can now download relevant documents from eWRIMS online database. First we generate list of links to which the web browser will navigate. Web link generators have been set up for Statements of Diversion and Use, Appropriative, and Appropriative (State Filing) based on what links on eWRIMS have previously yielded documents.</p>
-<p>Then we navigate to linked web pages to download documents from eWRIMS. This process will take awhile depending on how many PODs are within the watershed. Documents will be downloaded to download path defined within Google Chrome (see Setup page for more details).</p>
+<p>Then we navigate to linked web pages to download documents from eWRIMS. This process will take awhile depending on how many PODs are within the watershed. Documents will be downloaded to download path defined within Google Chrome (see Setup page for more details). If you later want to come back and run parts of the code without the eWRIMS documents being downloaded, you can comment out the “for loops” that call <code>browseURL</code> function.</p>
 <pre class="r"><code>  POD_in_watershed$link &lt;- character(length(nrow(POD_in_watershed)))
   
   link &lt;-
@@ -439,7 +439,7 @@ database_table &lt;- left_join(database_table, license_maps)
 database_table &lt;- left_join(database_table, legacy_maps)
 database_table[is.na(database_table)] &lt;- &#39;N&#39;
 
-# Create an ephemeral in-memory RSQLite database and generate query ----
+# Create an ephemeral in-memory RSQLite database and generate query 
 con &lt;- dbConnect(RSQLite::SQLite(), &quot;:memory:&quot;)
 
 dbWriteTable(con, &quot;database_table&quot;, database_table)</code></pre>
@@ -449,7 +449,7 @@ dbWriteTable(con, &quot;database_table&quot;, database_table)</code></pre>
 <p>Now that SQLite database has been built, it can be queried for watershed records of interest and then joined to information in eWRIMS flat files by application ID (including beneficial uses, water right types, primary owner, face value, status, and county).</p>
 <pre class="r"><code>res &lt;- subset(database_table, APPL_ID %in% app_numbers)
 
-# join APPL_IDs and availability information ----
+# join APPL_IDs and availability information 
 
 POD_in_watershed &lt;- inner_join(POD_in_watershed, res)
 # remove unnecessary variables from environments
