@@ -181,7 +181,7 @@ Set download location within Google Chrome at Settings –&gt; Advanced –&gt; 
 </div>
 <div id="section-fill-in-necessary-directory-paths" class="section level3">
 <h3>Fill in necessary directory paths</h3>
-<p>User should go through script prior to execution and fill in necessary directory paths. You need to pre-define two separate paths (Google Chrome default download location and where maps identified from eWRIMS will be stored). There are three lines of script that need paths filled in. You can search for these line using the find function for “ENTER DIRECTORY PATH HERE”. Remember to use “/” between any folders in the directory path.</p>
+<p>User should go through script prior to execution and fill in necessary directory paths. You need to pre-define two separate paths (Google Chrome default download location and where maps identified from eWRIMS will be stored). There are two lines of script that need paths filled in. You can search for these lines using the find function for “ENTER DIRECTORY PATH HERE”. Remember to use “/” between any folders in the directory path.</p>
 </div>
 <div id="section-readkey-function" class="section level3">
 <h3><code>readKey</code> function</h3>
@@ -359,6 +359,7 @@ watershed &lt;-
   SF_links &lt;-
     sapply(app_numbers[endsWith(app_numbers, &quot;SF&quot;)], link, &quot;Appropriative (State Filing)&quot;)
   
+# you can comment out the next three loops if want to avoid downloading files from eWRIMS
   
   for (i in 1:length(A_links)) {
   browseURL(A_links[i])
@@ -374,7 +375,7 @@ watershed &lt;-
 </div>
 <div id="section-were-all-possible-ewrims-documents-downloaded" class="section level2">
 <h2>Were all possible eWRIMS documents downloaded?</h2>
-<p>This last part of <code>correctSQL</code> function serves as a check that all possible documents from eWRIMS were downloaded. Generally, you can check that variable <code>total_WR</code> is equivalent to number of PODs within watershed. If not, it is possible that some documents were unavailable for download on eWRIMS and you can check to which application IDs that may be applicable. It is a confirmation that documents were unavailable as opposed to not downloaded due to server timeout or similar issue.</p>
+<p>This last part of <code>correctSQL</code> function serves as a check that all possible documents from eWRIMS were downloaded. Generally, you can check that sum of value <code>other_WR</code> and number of files downloaded from eWRIMS is equivalent to number of unique application IDs (value <code>app_numbers</code>). It is a confirmation that documents were unavailable as opposed to not downloaded due to server timeout or similar issue.</p>
 <pre class="r"><code>  # generate a count to see if all docs possible were downloaded from eWRIMS
   c &lt;- sum(startsWith(app_numbers, &quot;C&quot;))
   d &lt;- sum(startsWith(app_numbers, &quot;D&quot;))
@@ -382,36 +383,79 @@ watershed &lt;-
   l &lt;- sum(startsWith(app_numbers, &quot;L&quot;))
   x &lt;- sum(startsWith(app_numbers, &quot;X&quot;))
   
-  # directory is where statements/applications were downloaded
+  # directory is where eWRIMS documents were downloaded
   a &lt;-
     sum(startsWith(setdiff(
-      app_numbers, file_path_sans_ext(list.files(&quot;ENTER DIRECTORY PATH HERE&quot;))
+      app_numbers, file_path_sans_ext(list.files(eWRIMS_download_location))
     ), &quot;A&quot;))
   s &lt;-
     sum(startsWith(setdiff(
-      app_numbers, file_path_sans_ext(list.files(&quot;ENTER DIRECTORY PATH HERE&quot;))
+      app_numbers, file_path_sans_ext(list.files(eWRIMS_download_location))
     ), &quot;S&quot;))
   
   
-  total_WR &lt;&lt;- a + c + d + f + l + s + x</code></pre>
-<p>After <code>correctSQL</code> function finishes executing, the <code>readKey</code> function is called to pause script and allow user to determine which downloaded documents have maps and to copy those documents to a new, pre-defined directory. Documents should be named by application ID.</p>
+  other_WR &lt;&lt;- a + c + d + f + l + s + x
+  
+}
+correctSQL(x)
+
+print(paste0(&quot;Number of water rights without documents: &quot;, other_WR))
+# directory path in next two lines is where eWRIMS documents were downloaded
+print(paste0(
+  &quot;Number of documents downloaded from eWRIMS: &quot;,
+  length(list.files(eWRIMS_download_location))
+))
+print(paste0(&quot;Sum: &quot;, sum(other_WR, length(
+  list.files(eWRIMS_download_location)
+))))
+print(paste0(&quot;Number of unique application IDs: &quot;, length(app_numbers)))
+# Sum should be equivalent to number of unique application IDs, assuming all available documents from eWRIMS were downloaded</code></pre>
+<p>After <code>correctSQL</code> function finishes executing, a series of print statements show counts for sum of water rights without documents and documents downloaded from eWRIMS as well as number of unique application IDs. Confirm that these two values match.The <code>readKey</code> function is then called to pause script and allow user to determine which downloaded documents have maps and to copy those documents to a new, pre-defined directory. Documents should be named by application ID.</p>
 <p>User can manually look through documents to identify those with maps or possibly adapt upon work developed to use image entropy classification (see <a href="https://cawaterboards.sharepoint.com/:u:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/Image%20Entropy%20Classification/Image_Entropy_Filtering_Script.py?csf=1&amp;web=1&amp;e=mOoKgh">Image_Entropy_Filtering_Script.py</a>) or machine learning (see <a href="https://cawaterboards.sharepoint.com/:u:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Reference%20Materials/Machine%20Learning/Machine_Learning_Recognize_Docs_Maps.py?csf=1&amp;web=1&amp;e=w9JsE6">Machine_Learning_Recognize_Docs_Maps.py</a>).</p>
 </div>
 <div id="section-determine-which-maps-have-already-been-scanned" class="section level2">
 <h2>Determine which maps have already been scanned</h2>
-<p>After eWRIMS documents with maps have been identified and copied into pre-defined directory, user can then press ENTER in console to continue script.<code>BayDelta_masterlist</code> was generated based on all PODs within the Bay-Delta boundary shapefile.</p>
+<p>After eWRIMS documents with maps have been identified and copied into pre-defined directory, user can then press ENTER in console to continue script.<code>BayDelta_masterlist</code> was generated based on all PODs within the Bay-Delta boundary shapefile.Application IDs for <code>BayDelta_masterlist</code> will need to be revised for state filings and domestic water rights (see section “Recode application IDs for state filings and domestic water rights”).</p>
 <p>At this point, the JEM Query will now build a SQLite database based on lookup tables of application IDs associated with various collections of pre-scanned maps. <a href="https://cawaterboards.sharepoint.com/:w:/r/DWR/MITWG/Documents/Project%20-%20POU/Division_Document_Deliverables/Documentation/Data%20Management/Legacy%20Scanned%20and%20Georeferenced%20Map%20Locations%20on%20S%20Drive.docx?d=w01d619ce5b90429aa884690650380a18&amp;csf=1&amp;web=1&amp;e=eaHTuc">Documentation</a> on MITWG Sharepoint describes locations of legacy scanned and georeferenced maps on shared drive.</p>
-<pre class="r"><code># Generate master list of all water rights in Bay-Delta boundary area
+<pre class="r"><code># Generate master list of all water rights in Bay-Delta boundary area ----
 BayDelta_masterlist &lt;-
   read.csv(&#39;www/Application_IDs_MasterList.csv&#39;)
 BayDelta_masterlist &lt;- BayDelta_masterlist %&gt;% select(&quot;APPL_ID&quot;)
 recode(BayDelta_masterlist$APPL_ID, &quot;S17275&quot; = &quot;S017275&quot;) -&gt; BayDelta_masterlist$APPL_ID
 BayDelta_masterlist &lt;- unique(BayDelta_masterlist)
+# if first 7 characters of APPL_ID match, add SF to ending
+add_SF &lt;-
+  intersect(BayDelta_masterlist$APPL_ID, substr(SF$APPL_ID, 1, 7))
+add_SF_recode &lt;- paste0(add_SF, &quot;SF&quot;)
+app_numbers_recoded &lt;-
+  data.frame(add_SF_recode[match(BayDelta_masterlist$APPL_ID, add_SF)])
 
-# directory will contain eWRIMS documents with PDF maps named by APPL_ID
+df &lt;- cbind(app_numbers_recoded, BayDelta_masterlist$APPL_ID)
+df &lt;- df %&gt;% mutate_all(as.character)
+colnames(df) &lt;- c(&quot;recoded&quot;, &quot;original&quot;)
+df$recoded[is.na(df$recoded)] &lt;- df$original[is.na(df$recoded)]
+
+BayDelta_masterlist$APPL_ID &lt;- df$recoded
+
+# remove R from end of domestic statements, otherwise cannot link with flat file
+
+BayDelta_masterlist$APPL_ID &lt;-
+  sub(&quot;R$&quot;, &quot;&quot;, BayDelta_masterlist$APPL_ID)
+
+# Calling in lists of maps that are available from legacy effort or eWRIMS ----
+
+# directory will contain eWRIMS documents with maps named by APPL_ID
+# Note: If there are multiple maps with same APPL_ID, just add &quot;_[number]&quot; after APPL_ID (i.e. S017275_1, S017275_2, etc.)
 # will need to look through all documents downloaded to determine which ones have maps
 eWRIMS_available &lt;-
-  data.frame(file_path_sans_ext(list.files(&#39;ENTER DIRECTORY PATH HERE&#39;)))
+  data.frame(file_path_sans_ext(list.files(id_maps_location)))
+eWRIMS_available &lt;- eWRIMS_available %&gt;% rename(APPL_ID = 1)
+eWRIMS_available$APPL_ID &lt;-
+  sub(&quot;_[0-9][0-9]&quot;, &quot;&quot;, eWRIMS_available$APPL_ID)
+eWRIMS_available$APPL_ID &lt;-
+  sub(&quot;_[0-9]&quot;, &quot;&quot;, eWRIMS_available$APPL_ID)
+eWRIMS_available &lt;-
+  data.frame(eWRIMS_available[!duplicated(eWRIMS_available), ])
 eWRIMS_available &lt;- eWRIMS_available %&gt;% rename(APPL_ID = 1)
 eWRIMS_available$Available_eWRIMS &lt;- &#39;Y&#39;
 
@@ -439,17 +483,38 @@ database_table &lt;- left_join(database_table, license_maps)
 database_table &lt;- left_join(database_table, legacy_maps)
 database_table[is.na(database_table)] &lt;- &#39;N&#39;
 
-# Create an ephemeral in-memory RSQLite database and generate query 
+# Create an ephemeral in-memory RSQLite database and generate query ----
 con &lt;- dbConnect(RSQLite::SQLite(), &quot;:memory:&quot;)
 
-dbWriteTable(con, &quot;database_table&quot;, database_table)</code></pre>
+dbWriteTable(con, &quot;database_table&quot;, database_table)
+
+res &lt;- subset(database_table, APPL_ID %in% app_numbers)
+
+dbDisconnect(con)</code></pre>
 </div>
 <div id="section-query-sqlite-database-join-information-from-ewrims-flat-files" class="section level2">
 <h2>Query SQLite database &amp; join information from eWRIMS flat files</h2>
 <p>Now that SQLite database has been built, it can be queried for watershed records of interest and then joined to information in eWRIMS flat files by application ID (including beneficial uses, water right types, primary owner, face value, status, and county).</p>
 <pre class="r"><code>res &lt;- subset(database_table, APPL_ID %in% app_numbers)
 
-# join APPL_IDs and availability information 
+# if first 7 characters of APPL_ID match, add SF to ending
+add_SF &lt;-
+  intersect(POD_in_watershed$APPL_ID, substr(SF$APPL_ID, 1, 7))
+add_SF_recode &lt;- paste0(add_SF, &quot;SF&quot;)
+app_numbers_recoded &lt;-
+  data.frame(add_SF_recode[match(POD_in_watershed$APPL_ID, add_SF)])
+
+df &lt;- cbind(app_numbers_recoded, POD_in_watershed$APPL_ID)
+df &lt;- df %&gt;% mutate_all(as.character)
+colnames(df) &lt;- c(&quot;recoded&quot;, &quot;original&quot;)
+df$recoded[is.na(df$recoded)] &lt;- df$original[is.na(df$recoded)]
+
+POD_in_watershed$APPL_ID &lt;- df$recoded
+
+# remove R from end of domestic statements, otherwise cannot link with flat file
+
+POD_in_watershed$APPL_ID &lt;- sub(&quot;R$&quot;, &quot;&quot;, POD_in_watershed$APPL_ID)
+
 
 POD_in_watershed &lt;- inner_join(POD_in_watershed, res)
 # remove unnecessary variables from environments
@@ -458,18 +523,23 @@ rm(
   eWRIMS_available,
   georeferenced_maps,
   license_maps,
-  legacy_maps
+  legacy_maps,
+  df,
+  con,
+  hu_8,
+  legalDelta,
+  MOK,
+  res,
+  SF,
+  add_SF,
+  add_SF_recode,
+  other_WR,
+  app_numbers_recoded,
+  database_table
 )
 
-# Load Data from eWRIMS Flat Files
-flatFULL &lt;-
-  fread(
-    &quot;www/ewrims_flat_file.csv&quot;,
-    header = TRUE,
-    stringsAsFactors = FALSE,
-    data.table = FALSE,
-    blank.lines.skip = TRUE
-  )
+# Load Data from eWRIMS Flat Files ----
+
 flat &lt;- flatFULL
 flat &lt;- flat[, c(2, 21, 26, 6, 7, 118)]
 colnames(flat) &lt;-
@@ -559,7 +629,7 @@ session$onSessionEnded(function() {
 <!--/html_preserve-->
 <!--html_preserve-->
 <script type="application/shiny-prerendered" data-context="execution_dependencies">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37]}},"value":[{"type":"character","attributes":{},"value":["backports","base","compiler","datasets","digest","evaluate","fastmap","graphics","grDevices","highr","htmltools","htmlwidgets","httpuv","jsonlite","knitr","later","learnr","magrittr","markdown","methods","mime","promises","R6","Rcpp","rlang","rmarkdown","rprojroot","shiny","stats","stringi","stringr","tools","utils","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.1.5","3.6.2","3.6.2","3.6.2","0.6.22","0.14","1.0.1","3.6.2","3.6.2","0.8","0.4.0","1.5.1","1.5.2","1.6.1","1.28","1.0.0","0.10.1","1.5","1.1","3.6.2","0.8","1.1.0","2.4.0","1.0.2","0.4.1","2.1","1.3-2","1.4.0","3.6.2","1.4.3","1.4.0","3.6.2","3.6.2","2.1.2","0.12","1.8-4","2.2.0"]}]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37]}},"value":[{"type":"character","attributes":{},"value":["backports","base","compiler","datasets","digest","evaluate","fastmap","graphics","grDevices","highr","htmltools","htmlwidgets","httpuv","jsonlite","knitr","later","learnr","magrittr","markdown","methods","mime","promises","R6","Rcpp","rlang","rmarkdown","rprojroot","shiny","stats","stringi","stringr","tools","utils","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.1.5","3.6.2","3.6.2","3.6.2","0.6.22","0.14","1.0.1","3.6.2","3.6.2","0.8","0.4.0","1.5.1","1.5.2","1.6.1","1.28","1.0.0","0.10.1","1.5","1.1","3.6.2","0.8","1.1.0","2.4.0","1.0.2","0.4.1","2.1","1.3-2","1.4.0","3.6.2","1.4.6","1.4.0","3.6.2","3.6.2","2.1.2","0.12","1.8-4","2.2.0"]}]}]}
 </script>
 <!--/html_preserve-->
 </div>

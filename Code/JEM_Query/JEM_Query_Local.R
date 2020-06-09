@@ -14,6 +14,11 @@ current_path <- getActiveDocumentContext()$path
 # The next line set the working directory to the relevant one:
 setwd(dirname(current_path))
 
+# define directories where: 1) eWRIMS documents will be downloaded and 2) maps identified will be saved
+# remember to use "/" between folders in directory path
+eWRIMS_download_location <- 'ENTER DIRECTORY PATH HERE'
+id_maps_location <- 'ENTER DIRECTORY PATH HERE'
+
 # Set up Google Chrome as default browser and select download file location in settings
 
 # pause function
@@ -50,7 +55,7 @@ correctSQL <- function(x) {
   
   # now get list of all application IDs in eWRIMS
   
-  flatFULL <-
+  flatFULL <<-
     fread(
       "www/ewrims_flat_file.csv",
       header = TRUE,
@@ -106,15 +111,15 @@ correctSQL <- function(x) {
   
   # you can comment out the next three loops if want to avoid downloading files from eWRIMS
   for (i in 1:length(A_links)) {
-  browseURL(A_links[i])
+    browseURL(A_links[i])
   }
 
   for (i in 1:length(S_links)) {
-  browseURL(S_links[i])
+    browseURL(S_links[i])
   }
 
   for (i in 1:length(SF_links)) {
-  browseURL(SF_links[i])
+    browseURL(SF_links[i])
   }
   
   # generate a count to see if all docs possible were downloaded from eWRIMS
@@ -124,24 +129,44 @@ correctSQL <- function(x) {
   l <- sum(startsWith(app_numbers, "L"))
   x <- sum(startsWith(app_numbers, "X"))
   
-  #directory is where statements/applications were downloaded
+  # directory is where eWRIMS documents were downloaded
   a <-
     sum(startsWith(setdiff(
-      app_numbers, file_path_sans_ext(list.files("ENTER DIRECTORY PATH HERE"))
+      app_numbers, file_path_sans_ext(list.files(eWRIMS_download_location))
     ), "A"))
   s <-
     sum(startsWith(setdiff(
-      app_numbers, file_path_sans_ext(list.files("ENTER DIRECTORY PATH HERE"))
+      app_numbers, file_path_sans_ext(list.files(eWRIMS_download_location))
     ), "S"))
-
-
+  
+  
   other_WR <<- a + c + d + f + l + s + x
   
 }
 correctSQL(x)
 
-# stop script here until you have identified eWRIMS documents with maps
+print(paste0("Number of water rights without documents: ", other_WR))
+# directory path in next two lines is where eWRIMS documents were downloaded
+print(paste0(
+  "Number of documents downloaded from eWRIMS: ",
+  length(list.files(eWRIMS_download_location))
+))
+print(paste0("Sum: ", sum(other_WR, length(
+  list.files(eWRIMS_download_location)
+))))
+print(paste0("Number of unique application IDs: ", length(app_numbers)))
+# Sum should be equivalent to number of unique application IDs, assuming all available documents from eWRIMS were downloaded
+
+# stop script here until you have identified eWRIMS documents with maps, then press ENTER to continue
 readKey()
+
+# now get list of all application IDs in eWRIMS
+flat <- flatFULL
+
+flat <- data.frame(flat[, c(2)])
+colnames(flat) <- c("APPL_ID")
+# determine SF APPL_IDs
+SF <- filter(flat, grepl('SF', APPL_ID))
 
 # Generate master list of all water rights in Bay-Delta boundary area ----
 BayDelta_masterlist <-
@@ -149,13 +174,39 @@ BayDelta_masterlist <-
 BayDelta_masterlist <- BayDelta_masterlist %>% select("APPL_ID")
 recode(BayDelta_masterlist$APPL_ID, "S17275" = "S017275") -> BayDelta_masterlist$APPL_ID
 BayDelta_masterlist <- unique(BayDelta_masterlist)
+# if first 7 characters of APPL_ID match, add SF to ending
+add_SF <-
+  intersect(BayDelta_masterlist$APPL_ID, substr(SF$APPL_ID, 1, 7))
+add_SF_recode <- paste0(add_SF, "SF")
+app_numbers_recoded <-
+  data.frame(add_SF_recode[match(BayDelta_masterlist$APPL_ID, add_SF)])
+
+df <- cbind(app_numbers_recoded, BayDelta_masterlist$APPL_ID)
+df <- df %>% mutate_all(as.character)
+colnames(df) <- c("recoded", "original")
+df$recoded[is.na(df$recoded)] <- df$original[is.na(df$recoded)]
+
+BayDelta_masterlist$APPL_ID <- df$recoded
+
+# remove R from end of domestic statements, otherwise cannot link with flat file
+
+BayDelta_masterlist$APPL_ID <-
+  sub("R$", "", BayDelta_masterlist$APPL_ID)
 
 # Calling in lists of maps that are available from legacy effort or eWRIMS ----
 
-# directory will contain eWRIMS documents with PDF maps named by APPL_ID
+# directory will contain eWRIMS documents with maps named by APPL_ID
+# Note: If there are multiple maps with same APPL_ID, just add "_[number]" after APPL_ID (i.e. S017275_1, S017275_2, etc.)
 # will need to look through all documents downloaded to determine which ones have maps
 eWRIMS_available <-
-  data.frame(file_path_sans_ext(list.files('ENTER DIRECTORY PATH HERE'))) 
+  data.frame(file_path_sans_ext(list.files(id_maps_location)))
+eWRIMS_available <- eWRIMS_available %>% rename(APPL_ID = 1)
+eWRIMS_available$APPL_ID <-
+  sub("_[0-9][0-9]", "", eWRIMS_available$APPL_ID)
+eWRIMS_available$APPL_ID <-
+  sub("_[0-9]", "", eWRIMS_available$APPL_ID)
+eWRIMS_available <-
+  data.frame(eWRIMS_available[!duplicated(eWRIMS_available), ])
 eWRIMS_available <- eWRIMS_available %>% rename(APPL_ID = 1)
 eWRIMS_available$Available_eWRIMS <- 'Y'
 
@@ -190,7 +241,28 @@ dbWriteTable(con, "database_table", database_table)
 
 res <- subset(database_table, APPL_ID %in% app_numbers)
 
+dbDisconnect(con)
+
 # join APPL_IDs and availability information ----
+
+# if first 7 characters of APPL_ID match, add SF to ending
+add_SF <-
+  intersect(POD_in_watershed$APPL_ID, substr(SF$APPL_ID, 1, 7))
+add_SF_recode <- paste0(add_SF, "SF")
+app_numbers_recoded <-
+  data.frame(add_SF_recode[match(POD_in_watershed$APPL_ID, add_SF)])
+
+df <- cbind(app_numbers_recoded, POD_in_watershed$APPL_ID)
+df <- df %>% mutate_all(as.character)
+colnames(df) <- c("recoded", "original")
+df$recoded[is.na(df$recoded)] <- df$original[is.na(df$recoded)]
+
+POD_in_watershed$APPL_ID <- df$recoded
+
+# remove R from end of domestic statements, otherwise cannot link with flat file
+
+POD_in_watershed$APPL_ID <- sub("R$", "", POD_in_watershed$APPL_ID)
+
 
 POD_in_watershed <- inner_join(POD_in_watershed, res)
 # remove unnecessary variables from environments
@@ -199,18 +271,23 @@ rm(
   eWRIMS_available,
   georeferenced_maps,
   license_maps,
-  legacy_maps
+  legacy_maps,
+  df,
+  con,
+  hu_8,
+  legalDelta,
+  MOK,
+  res,
+  SF,
+  add_SF,
+  add_SF_recode,
+  other_WR,
+  app_numbers_recoded,
+  database_table
 )
 
 # Load Data from eWRIMS Flat Files ----
-flatFULL <-
-  fread(
-    "www/ewrims_flat_file.csv",
-    header = TRUE,
-    stringsAsFactors = FALSE,
-    data.table = FALSE,
-    blank.lines.skip = TRUE
-  )
+
 flat <- flatFULL
 flat <- flat[, c(2, 21, 26, 6, 7, 118)]
 colnames(flat) <-
